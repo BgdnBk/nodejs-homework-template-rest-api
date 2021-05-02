@@ -1,56 +1,68 @@
 const Contact = require("./schemas/contact");
 
-const listContacts = async () => {
-  const results = await Contact.find();
+const listContacts = async (userId, query) => {
+  const {
+    sortBy,
+    sortByDesc,
+    filter,
+    subscription = null,
+    limit = 5,
+    offset = 0,
+  } = query;
+  const optionsSearch = { owner: userId };
+  if (subscription !== null) {
+    optionsSearch.subscription = subscription;
+  }
+  const results = await Contact.paginate(optionsSearch, {
+    limit,
+    offset,
+    sort: {
+      ...(sortBy ? { [`${sortBy}`]: 1 } : {}),
+      ...(sortByDesc ? { [`${sortByDesc}`]: -1 } : {}),
+    },
+    select: filter ? filter.split("|").join(" ") : "",
+    populate: {
+      path: "owner",
+      select: " email subscription -_id",
+    },
+  });
   return results;
-  // return db.get("contacts").value();
 };
 
-const getContactById = async (id) => {
-  const results = await Contact.findById(id);
+const getContactById = async (userId, id) => {
+  const results = await Contact.findById(id, { owner: userId }).populate({
+    path: "owner",
+    select: " email subscription -_id",
+  });
   return results;
-  // return db.get("contacts").find({ id }).value();
 };
 
-const removeContact = async (id) => {
-  const results = await Contact.findByIdAndRemove(id);
+const removeContact = async (userId, id) => {
+  const results = await Contact.findByIdAndRemove(id, { owner: userId });
   return results;
-  // const [record] = db.get("contacts").remove({ id }).write();
-  // return record;
 };
 
-const addContact = async (body) => {
-  const results = await Contact.create(body);
+const addContact = async (userId, body) => {
+  const results = await Contact.create({ ...body, owner: userId });
   return results;
-  // const record = { ...body };
-  // db.get("contacts").push(record).write();
-  // return record;
 };
 
-const updateContact = async (id, body) => {
+const updateContact = async (userId, id, body) => {
   const results = await Contact.findByIdAndUpdate(
-    id,
+    { _id: id, owner: userId },
     { ...body },
     { new: true }
   );
   return results;
-
-  // const record = db.get("contacts").find({ id }).assign(body).value();
-  // db.write();
-  // return record.id ? record : null;
 };
 
-const updateStatusContact = async (id, body) => {
+const updateStatusContact = async (userId, id, body) => {
   const results = await Contact.findByIdAndUpdate(
-    id,
+    { _id: id, owner: userId },
     { ...body },
     { new: true }
   );
   return results;
-
-  // const record = db.get("contacts").find({ id }).assign(body).value();
-  // db.write();
-  // return record.id ? record : null;
 };
 
 module.exports = {
