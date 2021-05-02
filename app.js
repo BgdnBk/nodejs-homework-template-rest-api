@@ -1,8 +1,10 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
+const boolParser = require("express-query-boolean");
 
-const contactsRouter = require("./routes/api/contacts");
+const contactsRouter = require("./routes/contacts");
+const userRouter = require("./routes/users");
 
 const app = express();
 
@@ -10,8 +12,11 @@ const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
 app.use(logger(formatsLogger));
 app.use(cors());
-app.use(express.json());
 
+app.use(express.json());
+app.use(boolParser());
+
+app.use("/api/users", userRouter);
 app.use("/api/contacts", contactsRouter);
 
 app.use((req, res) => {
