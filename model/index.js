@@ -26,7 +26,8 @@ const listContacts = async (userId, query) => {
       select: " email subscription -_id",
     },
   });
-  return results;
+  const { docs: allContacts, totalDocs: total } = results;
+  return { allContacts, total, limit, offset };
 };
 
 const getContactById = async (userId, id) => {
