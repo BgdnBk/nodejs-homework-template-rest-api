@@ -13,7 +13,6 @@ passport.use(
   new Strategy(opts, async (payload, done) => {
     try {
       const user = await Users.findById(payload.id);
-
       if (!user) {
         return done(new Error("User not found"), false);
       }
