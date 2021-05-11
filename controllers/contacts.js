@@ -4,18 +4,12 @@ const getAll = async (req, res, next) => {
   try {
     const userId = req.user?.id;
 
-    const { allContacts, total, limit, offset } = await Contacts.listContacts(
-      userId,
-      req.query
-    );
+    const allContacts = await Contacts.listContacts(userId, req.query);
     return res.json({
       status: "success",
       code: 200,
       data: {
         allContacts,
-        total,
-        limit,
-        offset,
       },
     });
   } catch (e) {
